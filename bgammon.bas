@@ -4,7 +4,13 @@
 $Resize:Stretch
 DEFINT A-Z
 const xr = 320, yr = 200, screenMode = 7
+const TRUE = 1, FALSE = NOT TRUE
 
+const GSMain = 0
+const GSGamestart = 1
+const GSConfig = 2
+const GSBoardEdit = 3
+const GSHelp = 4
 
 'Layout fuer das Spielbret
     Type GameBoard
@@ -90,7 +96,44 @@ const xr = 320, yr = 200, screenMode = 7
         If i Mod 2 = 1 Then points(6 - i).c = Board.colorPoint2 Else points(6 - i).c = Board.colorPoint1
     next
 
-
+HelpText:
+Data 30
+data "1la bla bla bla"
+data "2le ble ble ble"
+data "3le ble ble ble"
+data "4le ble ble ble"
+data "5le ble ble ble"
+data "6le ble ble ble"
+data "7le ble ble ble"
+data "8le ble ble ble"
+data "9le ble ble ble"
+data "10e ble ble ble"
+data "11e ble ble ble"
+data "12a bla bla bla"
+data "13a bla bla bla"
+data "14a bla bla bla"
+data "15a bla bla bla"
+data "16a bla bla bla"
+data "17a bla bla bla"
+data "18a bla bla bla"
+data "19a bla bla bla"
+data "20a bla bla bla"
+data "21a bla bla bla"
+data "22a bla bla bla"
+data "23a bla bla bla"
+data "24a bla bla bla"
+data "25a bla bla bla"
+data "26a bla bla bla"
+data "27a bla bla bla"
+data "28a bla bla bla"
+data "29a bla bla bla"
+data "30z blz blz blz"
+dim shared helpTextLength
+read helpTextLength
+dim shared HelpText$(helpTextLength)
+for i = 1 to helpTextLength
+    read HelpText$(i)
+next
 
 screen screenMode, ,  1, 0
 
@@ -118,8 +161,8 @@ screen screenMode, ,  1, 0
 
     resetBoard
     selectedPoint = 8
-    dim shared gameState, menue, keypressed$
-    gameState = 0: menue = 0
+    dim shared gameState, menue, keypressed$, ende
+    gameState = GSMain: menue = 0: ende = FALSE
 
     Do
         keypressed$ = inkey$
@@ -135,15 +178,33 @@ screen screenMode, ,  1, 0
 
 
 
-    Loop while keypressed$ <> chr$(27)
-end
+    Loop while keypressed$ <> chr$(27) and ende = FALSE
+
+    'Programm Beenden
+    screen 0
+    width 80, 25
+    color 7, 0
+    cls
+    Print "Vielen Dank fuers Spielen!"
+    Print "SpionAtom, Winter 2o23"
+    end
 
 Sub drawMenue()
 
     select case gameState
-        case 0 'Hauptmenue
+        case GSMain 'Hauptmenue
             if keypressed$ = CHR$(0) + "H" then menue = (5 + menue - 1) mod 5
             if keypressed$ = CHR$(0) + "P" then menue = (5 + menue + 1) mod 5
+            if keypressed$ = chr$(13) then
+                  select case menue
+                    case 0: a = true
+                    case 1: b = true
+                    case 2: c = true
+                    case 3: gameState = GSHelp: menue = 0
+                    case 4: ende = TRUE
+                  end select
+            end if
+            if keypressed$ = chr$(27) then ende = TRUE
             color 15
             CenterMenue 2, "Hauptmenue"
             if menue = 0 then color 14 else color 7
@@ -157,9 +218,23 @@ Sub drawMenue()
             if menue = 4 then color 14 else color 7
             CenterMenue 13, "Beenden"
 
+        case GSHelp 'Hilfe
+            if keypressed$ = chr$(0) + "H" then menue = menue - 1: if menue < 0 then menue = 0
+            if keypressed$ = chr$(0) + "P" then menue = menue + 1: if menue > helpTextLength - 15 then menue = helpTextLength - 15
+            if keypressed$ = chr$(27) then gameState = GSMain: menue = 0
+            color 15
+            CenterMenue 2, "Hilfe"
+
+            color 7
+            for i = 1 to 15
+                locate i + 4, 26: print HelpText$(i + menue);
+            next
+
         case else
     end select
 
+
+    keypressed$ = ""
 End Sub
 
 
@@ -272,3 +347,6 @@ End Sub
 Sub Rect(x, y, w, h, c)
     Line (x, y) - (x + w - 1, y + h - 1), c, B
 End Sub
+
+
+
